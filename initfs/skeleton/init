@@ -1,0 +1,235 @@
+#!/bin/sh
+#
+# Init script for MOSLO (MeeGo OS LOader)
+#
+# Copyright (C) 2010-2011 Nokia Corporation.
+# Authors:
+#          Peter Antoniac <peter.antoniac@nokia.com>
+#          Timo Kokkonen <timo.t.kokkonen@nokia.com>
+#          Janne Lääkkö <janne.laakko@nokia.com>
+# 
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License version 2 as
+# published by the Free Software Foundation.
+
+INIT_OPTS=
+WD_NAME=twl4030_wdt
+# Text2screen wrapper for next lines
+TTSYI=0 # Where to start
+TTSX=0
+TTSY=TTSYI
+TTSYM=830 # Max y lines
+TTSCM=30 # Max char/line
+TTSI=30
+
+ttsr()
+{
+	TTSY=$TTSYI
+	/bin/text2screen -c -B000
+}
+
+tts()
+{
+	/bin/text2screen -p -s 2 -y $TTSY -t "$1"
+	echo $1
+        let "LINES=1+${#1}/$TTSCM"
+	let "TTSY+=($TTSI*$LINES)"
+	if [ $TTSY -gt $TTSYM ] ; then ttsr ; fi
+}
+
+tts_dot_wait(){
+	TTSX=0
+	for i in 5 4 3 2 1 0; do
+		/bin/text2screen -p -s 2 -y $TTSY -x $TTSX -t "$i "
+		echo -n "$i "
+		let "TTSX+=30"
+		sleep 1
+	done
+	let "LINES=1+6/$TTSCM"
+	let "TTSY+=($TTSI*$LINES)"
+	if [ $TTSY -gt $TTSYM ] ; then ttsr ; fi
+}
+
+shell()
+{
+	echo "Starting shell..."
+	/sbin/getty 115200 ttyS0 -n -l /bin/sh &
+	while : ; do
+		echo "30" >&3
+		sleep 2
+	done
+}
+
+reboot_to_harmattan()
+{
+        tts "Severe failure. Should reflash"
+        tts "the device with original Nokia"
+        tts "Harmattan release..."
+        tts "Will need power off."
+        sleep 30
+        tts_dot_wait
+        echo o > /proc/sysrq-trigger
+}
+
+trap_func()
+{
+	tts "Trap!"
+        reboot_to_harmattan
+}
+
+usb_is_plugged()
+{
+	usb=$(cat /sys/class/power_supply/usb/present)
+	return $usb
+}
+
+export_over_usb()
+{
+	umount /dev/mmcblk0p1
+	MP_ERR=1
+	TRY=0
+        while [ "$MP_ERR" -ne "0" -a $TRY -lt 10 ] ; do
+		modprobe g_file_storage file=/dev/mmcblk0p1 stall=0 \
+			removable=1 nofua=1
+		MP_ERR=$?
+		TRY=$(($TRY+1))
+                if [ -z "$ONCE" ]; then
+                        tts "Exporting MeeGo rootfs..."
+                        ONCE=1
+                else
+			tts "Trying no. $TRY"
+		fi
+	done
+	if [ $TRY == 10 ]; then
+                tts "We cannot load the USB modules!"
+		reboot_to_harmattan
+        fi
+
+	tts "Rootfs now exported via USB"
+
+	sleep 1
+
+	usb_is_plugged
+	plug=$?
+	while [ $plug == 1 ] ; do
+		sleep 1
+		usb_is_plugged
+		plug=$?
+	done
+}
+
+button_is_pressed()
+{
+	busybox grep button=prompt /proc/cmdline &> /dev/null
+}
+
+trap "trap_func" 0 2
+
+echo "START SYSTEM"
+
+# exit immediately if a command fails
+#set -e
+
+export PATH=/sbin:/bin:/usr/bin:/usr/sbin
+
+echo -n "Doing mounts... "
+mount -n -t devtmpfs none /dev || true
+mount -n -t proc proc /proc
+mount -n -t sysfs sysfs /sys
+mount -n -t tmpfs none -o size=10M /tmp
+mount -n -t debugfs /proc/sys/debug /proc/sys/debug || true
+mount -n -t tmpfs -o size=256k,mode=0755,nosuid,noatime tmpfs /var/run
+mkdir -p /dev/shm
+mount -n -o size=64M,nosuid,nodev,noatime -t tmpfs tmpfs /dev/shm
+cp /proc/mounts /etc/mtab
+echo "done"
+
+# Kick the watch dog
+exec 3>/dev/$WD_NAME
+echo "30" >&3
+
+# adjust kernel to minimize memory consumption,
+# flushing of memory card buffers
+# and optimize IO pressure
+
+#TODO fix pty/max and dirty ratio in kernel configuration
+echo 256 > /proc/sys/kernel/threads-max || \
+  tts "Set fail for kernel thread-max"
+echo 8192 > /proc/sys/fs/file-max || \
+  tts "Set fail for kernel file-max"
+echo 1 > /proc/sys/vm/swappiness || \
+  tts "Set fail for swappiness"
+echo 5 > /proc/sys/vm/page-cluster || \
+  tts "Set fail for page-cluster"
+echo 500 > /proc/sys/vm/dirty_expire_centisecs || \
+  tts "Set fail for expire_centisecs"
+echo 60 > /proc/sys/vm/dirty_background_ratio || \
+  tts "Set fail for dirty_background_ratio"
+echo 65536 > /proc/sys/net/core/rmem_default || \
+  tts "Set fail for rmem_default"
+echo 16384 > /proc/sys/net/core/wmem_default || \
+  tts "Set fail for wmem_default"
+
+#Set mdev as hotplug manager
+echo /sbin/mdev > /proc/sys/kernel/hotplug
+
+#Start Nokia's BME
+bme_RX-71 -n -c usr/lib/hwi/hw/rx71.so -d
+shell &
+
+# Clear the screen
+ttsr
+VERSION=$(cat /etc/moslo-version)
+tts ""
+tts " Welcome to MOSLO v$VERSION"
+tts "     The MeeGo bootloader"
+tts ""
+tts "You can use the USB to"
+tts "upload MeeGo rootfs"
+tts "at anytime after reboot"
+tts "Check also:"
+tts "wiki.meego.com/ARM/N9"
+
+# If the volume key is pressed reboot imedeatly into harmattan
+button_is_pressed
+if [ $? == 0 ] ; then
+	reboot2 s
+fi
+
+# For some reason the partition list doesn't have all partitions
+# listed here unless we sleep a little first.
+
+export MOUNT_DIR=mmcmount
+mkdir /$MOUNT_DIR
+
+export_over_usb
+
+mount /dev/mmcblk0p1 /$MOUNT_DIR || (
+        tts "Mounting MeeGo failed"
+	tts "We will not be able to"
+        tts "load the kernel."
+	TO_HARMATTAN=1
+)
+
+if [ $TO_HARMATTAN == 1 ] ; then
+	reboot_to_harmattan
+fi
+
+if [ -f "/$MOUNT_DIR/boot/bzImage" ] ; then
+	tts "Running MeeGo kernel"
+	kexec_load
+	kexec -e
+	tts "kexec failed: $?"
+	tts "Failed to boot /boot/bzImage"
+else
+	tts "No MeeGo kernel image found"
+fi
+
+reboot_to_harmattan
+
+# exit would trap and start a new shell again, so stay in the loop
+# forever
+while true; do
+	sleep 99999
+done
+

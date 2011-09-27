@@ -1,0 +1,23 @@
+
+#####################
+# skel
+# Last modified: 1242205129
+
+dir /bin 777 0 0
+dir /etc 755 0 0
+dir /lib 777 0 0
+dir /lib/modules 777 0 0
+dir /proc 777 0 0
+dir /root 755 0 0
+dir /sbin 777 0 0
+dir /sys 777 0 0
+dir /tmp 777 0 0
+dir /usr 777 0 0
+dir /usr/bin 777 0 0
+dir /usr/sbin 777 0 0
+dir /var 777 0 0
+dir /var/run 777 0 0
+dir /var/cache 777 0 0
+dir /var/cache/sysinfod 777 0 0
+dir /dev 777 0 0
+
