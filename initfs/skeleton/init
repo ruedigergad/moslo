@@ -215,7 +215,7 @@ if [ $TO_HARMATTAN == 1 ] ; then
 	reboot_to_harmattan
 fi
 
-if [ -f "/$MOUNT_DIR/boot/bzImage" ] ; then
+if [ -e "/$MOUNT_DIR/boot/bzImage" ] ; then
 	tts "Running MeeGo kernel"
 	kexec_load
 	kexec -e
