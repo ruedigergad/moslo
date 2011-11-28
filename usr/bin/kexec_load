@@ -1,12 +1,39 @@
 #!/bin/sh
 
-export MOUNT_DIR=mmcmount
-NOLO_CMD=$(cat /proc/cmdline)
-BOOT_CMD=$(ls -1r /$MOUNT_DIR/boot/cmdline*|sed -n '1p')
-MEEGO_ROOT="root=/dev/mmcblk0p1"
-MEEGO_CMD=$(sed q $BOOT_CMD)
-MOSLO_CMD=$(echo "$NOLO_CMD $MEEGO_CMD" |sed "s/root=[\./a-zA-Z0-9]* //g")
-CMD="$MOSLO_CMD $MEEGO_ROOT console=ttyS0,1152008N1"
+if [ $# -lt 1 ]; then
+    echo "Usage: $PROG <mount-dir>"
+    exit 1
+fi
 
-kexec -l /$MOUNT_DIR/boot/bzImage --command-line="$CMD"
+MOUNT_DIR=$1
+BOOT_DIR="$MOUNT_DIR/boot"
+BZIMAGE="$BOOT_DIR/bzImage"
+FALLBACK_ROOTDEV="/dev/mmcblk0p4"
 
+INITRD=""
+CMDLINE=""
+ORIG_CMDLINE="`cat /proc/cmdline`"
+
+if [ -f "$BZIMAGE" ]; then
+    if [ -f "$BOOT_DIR/initrd" ]; then
+        echo "Found initrd"
+        # use quoting and eval (later) to handle whitespace
+        INITRD="\"--initrd=$BOOT_DIR/initrd\""
+    fi
+    if [ -f "$BOOT_DIR/cmdline" ]; then
+        echo "Found cmdline, appending that to the original cmdline"
+        # use quoting and eval (later) to handle whitespace
+        CMDLINE="--command-line=\"$ORIG_CMDLINE `cat $BOOT_DIR/cmdline`\""
+    else
+        echo "No cmdline file found, appending \"root=$FALLBACK_ROOTDEV\" to the original cmdline"
+        CMDLINE="--command-line=\"$ORIG_CMDLINE root=$FALLBACK_ROOTDEV\""
+    fi
+    # use eval to handle emtpy arguments gracefully
+    echo "Using $CMDLINE"
+    eval "kexec -l  $INITRD $CMDLINE $BZIMAGE"
+    exit $?
+else
+    echo "kexec_load failed: bzImage not found"
+fi
+
+exit 1
