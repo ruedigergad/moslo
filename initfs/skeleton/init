@@ -188,6 +188,9 @@ echo /sbin/mdev > /proc/sys/kernel/hotplug
 bme_RX-71 -n -c usr/lib/hwi/hw/rx71.so -d
 shell &
 
+# Load modules
+modprobe twl4030_keypad
+
 # Clear the screen
 ttsr
 VERSION=$(cat /etc/moslo-version)

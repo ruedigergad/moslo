@@ -187,7 +187,7 @@ PATH=$PATH:$SCRIPTS_PATH:$WORK_DIR/usr/bin:$TOOLS_PATH
 ROOT_DIR=$WORK_DIR/rootfs
 BUILD_VERSION_DIR=$ROOT_DIR/usr/share/moslo
 
-KERNEL_MODS="g_nokia g_file_storage sep_driver"
+KERNEL_MODS="g_nokia g_file_storage sep_driver twl4030_keypad"
 KERNEL_MOD_DEP=$KERNEL_MOD_DIR/modules.dep
 
 UTIL_LIST=$BUILD_SRC/util-list
