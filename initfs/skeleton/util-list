@@ -12,5 +12,6 @@
 /usr/bin/fb_text2screen
 usr/bin/kexec_load
 sbin/reboot2
+sbin/evkey
 etc/moslo-version
 

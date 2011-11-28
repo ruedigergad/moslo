@@ -131,7 +131,7 @@ export_over_usb()
 
 button_is_pressed()
 {
-	busybox grep button=prompt /proc/cmdline &> /dev/null
+	evkey -s /dev/input/event4 | grep -q -w -e 114 -e 115
 }
 
 trap "trap_func" 0 2
