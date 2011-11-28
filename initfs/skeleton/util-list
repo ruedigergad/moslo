@@ -12,7 +12,7 @@
 /usr/lib/hwi/ic/twl5030.so
 /usr/lib/hwi/ic/twl5031.so
 /usr/lib/hwi/bc/tabby.so
-/bin/text2screen
+/usr/bin/fb_text2screen
 usr/bin/kexec_load
 sbin/reboot2
 etc/moslo-version

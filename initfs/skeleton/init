@@ -25,12 +25,12 @@ TTSI=30
 ttsr()
 {
 	TTSY=$TTSYI
-	/bin/text2screen -c -B000
+	fb_text2screen -c -B000
 }
 
 tts()
 {
-	/bin/text2screen -p -s 2 -y $TTSY -t "$1"
+	fb_text2screen -s 2 -y $TTSY -t "$1"
 	echo $1
         let "LINES=1+${#1}/$TTSCM"
 	let "TTSY+=($TTSI*$LINES)"
@@ -40,7 +40,7 @@ tts()
 tts_dot_wait(){
 	TTSX=0
 	for i in 5 4 3 2 1 0; do
-		/bin/text2screen -p -s 2 -y $TTSY -x $TTSX -t "$i "
+		fb_text2screen -s 2 -y $TTSY -x $TTSX -t "$i "
 		echo -n "$i "
 		let "TTSX+=30"
 		sleep 1
