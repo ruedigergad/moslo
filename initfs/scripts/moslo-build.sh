@@ -347,13 +347,6 @@ mkdir -p $TARGET_KERNEL_MOD_DIR
 
 
 #
-# create initrd (we need it to build the skeleton)
-#
-[ -z $NO_BUILD_FILE_REQ ] && \
-	gen_initramfs_list.sh -o $WORK_DIR/rootfs.cpio \
-		-u squash -g squash $SKEL_LIST $ROOT_DIR
-
-#
 # create tar of rootfs
 #
 if [ -n $TAR_FILE ]; then
@@ -364,13 +357,13 @@ if [ -n $TAR_FILE ]; then
         debug "$(tar -tf $WORK_DIR/$TAR_FILE)"
 fi
 
-[ -z $NO_BUILD_FILE_REQ ] && \
-	gzip  $WORK_DIR/rootfs.cpio
-
 #
 # create bootable image with cmdline, bootstub, kernel image and initrd
 #
 if [ -z $NO_BUILD_FILE_REQ ]; then
+    gen_initramfs_list.sh -o $WORK_DIR/rootfs.cpio \
+        -u squash -g squash $SKEL_LIST $ROOT_DIR
+    gzip  $WORK_DIR/rootfs.cpio
     cat $KERNEL_ZIMAGE > zImage
     cat $WORK_DIR/rootfs.cpio.gz > initrd.img
 	cat $KERNEL_ZIMAGE > $BUILD_FILE
