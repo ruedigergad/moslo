@@ -5,7 +5,9 @@ tools: gen_init_cpio reboot2 install_util
 install_util:
 	install -d ./sbin
 	install -d ./bin
+	install -d ./tools
 	install -m 755 $(TOOLS_PATH)/reboot2 ./sbin
+	install -m 755 $(TOOLS_PATH)/gen_init_cpio ./tools
 
 gen_init_cpio: $(TOOLS_PATH)/gen_init_cpio.c
 	gcc -Wall -O2 $(TOOLS_PATH)/gen_init_cpio.c -o $(TOOLS_PATH)/gen_init_cpio -Wl,--no-as-needed
