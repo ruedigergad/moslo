@@ -8,6 +8,7 @@ rootfs.tar: tools
 		-k /boot/vmlinuz-$(KERNEL_VERSION) \
 		-m /lib/modules/$(KERNEL_VERSION) \
 		-v $(VERSION) \
+		-o moslo.img \
 		-t rootfs.tar 
 
 all: rootfs.tar
