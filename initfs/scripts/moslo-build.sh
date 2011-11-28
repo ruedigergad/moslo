@@ -231,6 +231,10 @@ mkdir -p $ROOT_DIR/bin
 mkdir -p $ROOT_DIR/sbin
 mkdir -p $ROOT_DIR/usr/bin
 mkdir -p $ROOT_DIR/usr/sbin
+mkdir -p $ROOT_DIR/dev/shm
+
+# Install other files
+install -m644 $BUILD_SRC/fstab $ROOT_DIR/etc/fstab || exit 1
 
 #
 # create busybox links

@@ -20,4 +20,5 @@ dir /var/run 777 0 0
 dir /var/cache 777 0 0
 dir /var/cache/sysinfod 777 0 0
 dir /dev 777 0 0
+dir /dev/shm 777 0 0
 

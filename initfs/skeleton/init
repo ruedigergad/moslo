@@ -144,16 +144,10 @@ echo "START SYSTEM"
 export PATH=/sbin:/bin:/usr/bin:/usr/sbin
 
 echo -n "Doing mounts... "
-mount -n -t devtmpfs none /dev || true
-mount -n -t proc proc /proc
-mount -n -t sysfs sysfs /sys
-mount -n -t tmpfs none -o size=10M /tmp
-mount -n -t debugfs /proc/sys/debug /proc/sys/debug || true
-mount -n -t tmpfs -o size=256k,mode=0755,nosuid,noatime tmpfs /var/run
-mkdir -p /dev/shm
-mount -n -o size=64M,nosuid,nodev,noatime -t tmpfs tmpfs /dev/shm
-cp /proc/mounts /etc/mtab
-echo "done"
+mount /dev
+mkdir /dev/pts
+mount -a
+cat /proc/mounts > /etc/mtab
 
 # Kick the watch dog
 exec 3>/dev/$WD_NAME
