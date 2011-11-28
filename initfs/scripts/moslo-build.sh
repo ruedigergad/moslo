@@ -313,10 +313,6 @@ TMPFILE=$(mktemp /tmp/build-tmp-XXXXXX) || exit 1
 
 TARGET_KERNEL_MOD_DIR=$ROOT_DIR/lib/modules/$KERNEL_MOD_DIR_NAME
 
-[ -n $RPM  ] && {
-	TARGET_KERNEL_MOD_DIR=$(echo $TARGET_KERNEL_MOD_DIR | sed 's/-dali//')
-	echo $TARGET_KERNEL_MOD_DIR
-}
 mkdir -p $TARGET_KERNEL_MOD_DIR
 
 [ -a $KERNEL_MOD_DEP ] && {
