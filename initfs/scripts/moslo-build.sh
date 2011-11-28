@@ -237,30 +237,6 @@ mkdir -p $ROOT_DIR/dev/shm
 install -m644 $BUILD_SRC/fstab $ROOT_DIR/etc/fstab || exit 1
 
 #
-# create busybox links
-#
-ln -s ../sbin/busybox $ROOT_DIR/bin/sh
-ln -s ../sbin/busybox $ROOT_DIR/sbin/nice
-ln -s ../sbin/busybox $ROOT_DIR/sbin/getty
-ln -s ../sbin/busybox $ROOT_DIR/sbin/echo
-ln -s ../sbin/busybox $ROOT_DIR/sbin/mount
-ln -s ../sbin/busybox $ROOT_DIR/sbin/umount
-ln -s ../sbin/busybox $ROOT_DIR/sbin/cat
-ln -s ../sbin/busybox $ROOT_DIR/sbin/sleep
-ln -s ../sbin/busybox $ROOT_DIR/sbin/sed
-ln -s ../sbin/busybox $ROOT_DIR/sbin/mknod
-ln -s ../sbin/busybox $ROOT_DIR/sbin/mkdir
-ln -s ../sbin/busybox $ROOT_DIR/sbin/ls
-ln -s ../sbin/busybox $ROOT_DIR/sbin/cp
-ln -s ../sbin/busybox $ROOT_DIR/sbin/ln
-ln -s ../sbin/busybox $ROOT_DIR/sbin/ps
-ln -s ../sbin/busybox $ROOT_DIR/sbin/uname
-ln -s ../sbin/busybox $ROOT_DIR/sbin/ifconfig
-ln -s ../sbin/busybox $ROOT_DIR/sbin/ip
-ln -s ../sbin/busybox $ROOT_DIR/sbin/mdev
-ln -s ../sbin/busybox $ROOT_DIR/sbin/modprobe
-
-#
 # Fix Harmattan preinit
 #
 ln -s /init $ROOT_DIR/sbin/preinit
@@ -306,6 +282,13 @@ for i in $(cat $TMPFILE) ; do
 done
 echo "done"
 rm -f $TMPFILE
+
+# Create (and fix) busybox links
+BUSYBOX_BINARY=`find $ROOT_DIR -name "busybox*"`
+${BUSYBOX_BINARY} --install -s $ROOT_DIR/bin/
+for l in $ROOT_DIR/bin/*; do
+  ln -sf /sbin/busybox $l
+done
 
 #
 # install kernel modules
