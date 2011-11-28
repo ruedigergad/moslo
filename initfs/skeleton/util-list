@@ -1,10 +1,7 @@
 /sbin/insmod
-/sbin/modprobe
 /usr/sbin/kexec
-/sbin/sfdisk
 /sbin/busybox
 /usr/sbin/bme_RX-71
-/usr/bin/bmestat
 /usr/lib/hwi/hw/rx71.so
 /usr/lib/hwi/ic/bq24153.so
 /usr/lib/hwi/ic/bq24156.so

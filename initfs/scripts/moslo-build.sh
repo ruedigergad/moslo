@@ -254,6 +254,7 @@ ln -s ../sbin/busybox $ROOT_DIR/sbin/uname
 ln -s ../sbin/busybox $ROOT_DIR/sbin/ifconfig
 ln -s ../sbin/busybox $ROOT_DIR/sbin/ip
 ln -s ../sbin/busybox $ROOT_DIR/sbin/mdev
+ln -s ../sbin/busybox $ROOT_DIR/sbin/modprobe
 
 #
 # Fix Harmattan preinit
