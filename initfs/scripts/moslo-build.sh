@@ -384,6 +384,8 @@ fi
 # create bootable image with cmdline, bootstub, kernel image and initrd
 #
 if [ -z $NO_BUILD_FILE_REQ ]; then
+    cat $KERNEL_ZIMAGE > zImage
+    cat $WORK_DIR/rootfs.cpio.gz > initrd.img
 	cat $KERNEL_ZIMAGE > $BUILD_FILE
 	cat $WORK_DIR/rootfs.cpio.gz >> $BUILD_FILE
 	echo Build is ready at $BUILD_FILE
