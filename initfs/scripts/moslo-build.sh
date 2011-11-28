@@ -317,7 +317,11 @@ mkdir -p $TARGET_KERNEL_MOD_DIR
 
 [ -a $KERNEL_MOD_DEP ] && {
 	cp -p $KERNEL_MOD_DEP $TARGET_KERNEL_MOD_DIR/
-
+} || {
+    KERNEL_MOD_DEP="$TARGET_KERNEL_MOD_DIR/modules.dep"
+    depmod -an $KERNEL_VERSION > $KERNEL_MOD_DEP
+}
+{
 	for i in $KERNEL_MODS ; do \
 		KERNEL_MOD=$(sed -n "s/\(.*$i.ko\)\(:.*\)/\1/p" < \
 		$KERNEL_MOD_DEP)
