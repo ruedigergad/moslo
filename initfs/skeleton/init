@@ -88,16 +88,18 @@ usb_is_plugged()
 
 export_over_usb()
 {
-        umount "$1"
+        [ -e "$1" ] && {
+            umount "$1"
+            EXPORT_FILE="$1"
+        }
         rmmod g_nokia
         MP_ERR=1
         TRY=0
-        tts "Exporting AlternateOS rootfs..."
         while [ "$MP_ERR" -ne "0" -a $TRY -lt 10 ] ; do
-                modprobe g_file_storage file=$1 stall=0 \
-                        removable=1 nofua=1
+                modprobe g_multi ${EXPORT_FILE:+file=$EXPORT_FILE} \
+                        stall=0 removable=1 nofua=1
                 # check that the module really is loaded
-                lsmod |grep -q g_file_storage
+                lsmod |grep -q g_multi
                 MP_ERR=$?
                 TRY=$(($TRY+1))
                 #tts "Try $TRY ($MP_ERR)"
@@ -105,7 +107,12 @@ export_over_usb()
         if [ $TRY == 10 ]; then
                 tts "Unable to load the USB modules!"
         else
-                tts "Rootfs now exported via USB"
+                [ -n "$EXPORT_FILE" ] && \
+                    tts "Rootfs of AlternateOS now exported via USB"
+                ifconfig usb0 $IP_ARRD up
+                [ $? -eq 0 ] && \
+                    tts "You can telnet into $IP_ARRD" || \
+                    tts "Setting IP address failed!"
         fi
 
         sleep 1
