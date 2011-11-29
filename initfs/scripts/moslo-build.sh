@@ -191,7 +191,7 @@ KERNEL_MODS="g_nokia g_file_storage sep_driver twl4030_keypad"
 KERNEL_MOD_DEP=$KERNEL_MOD_DIR/modules.dep
 
 UTIL_LIST=$BUILD_SRC/util-list
-SKEL_LIST=$BUILD_SRC/skeleton-list
+DIR_LIST=$BUILD_SRC/dir-list
 
 [ -f "$KERNEL_ZIMAGE" ] || {
 	echo Cannot find kernel image $KERNEL_ZIMAGE
@@ -217,21 +217,15 @@ SKEL_LIST=$BUILD_SRC/skeleton-list
 
 rm -rf $ROOT_DIR $WORK_DIR/rootfs.cpio
 
+# Create directory skeleton
 mkdir -p $ROOT_DIR
+mkdir -p -m755 $(cat $DIR_LIST | sed s!^!$ROOT_DIR!)
 
 #install init
 install -m 755 $BUILD_SRC/init $ROOT_DIR/init || exit 1
 
 mkdir -p $BUILD_VERSION_DIR
 echo "Version: $BUILD_VERSION" > $BUILD_VERSION_DIR/build-release
-
-mkdir -p $ROOT_DIR/etc
-touch $ROOT_DIR/etc/mtab
-mkdir -p $ROOT_DIR/bin
-mkdir -p $ROOT_DIR/sbin
-mkdir -p $ROOT_DIR/usr/bin
-mkdir -p $ROOT_DIR/usr/sbin
-mkdir -p $ROOT_DIR/dev/shm
 
 # Install other files
 install -m644 $BUILD_SRC/fstab $ROOT_DIR/etc/fstab || exit 1
@@ -350,9 +344,6 @@ mkdir -p $TARGET_KERNEL_MOD_DIR
 # create tar of rootfs
 #
 if [ -n $TAR_FILE ]; then
-        ROOT_SED=$(echo $ROOT_DIR|sed "s/\\//\\\\\\//g")
-        mkdir -p -m777 $(cat $SKEL_LIST|\
-          sed -ne "s/.*\(\/[a-z/]*\).*/${ROOT_SED}\1/p")
 	tar -cf $WORK_DIR/$TAR_FILE $ROOT_DIR
         debug "$(tar -tf $WORK_DIR/$TAR_FILE)"
 fi
@@ -362,7 +353,7 @@ fi
 #
 if [ -z $NO_BUILD_FILE_REQ ]; then
     gen_initramfs_list.sh -o $WORK_DIR/rootfs.cpio \
-        -u squash -g squash $SKEL_LIST $ROOT_DIR
+        -u squash -g squash $ROOT_DIR
     gzip  $WORK_DIR/rootfs.cpio
     cat $KERNEL_ZIMAGE > zImage
     cat $WORK_DIR/rootfs.cpio.gz > initrd.img
