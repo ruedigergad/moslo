@@ -168,8 +168,12 @@ echo /bin/mdev > /proc/sys/kernel/hotplug
 modprobe twl4030_keypad
 modprobe g_nokia  # load g_nokia to make bme function properly
 
-#Start Nokia's BME
+#Start services
+syslogd &
 bme_RX-71 -n -c usr/lib/hwi/hw/rx71.so -d
+telnetd -l/bin/sh
+
+# Start shell for console use
 shell &
 
 # Clear screen and display welcome message
