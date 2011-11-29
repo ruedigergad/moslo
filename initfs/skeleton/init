@@ -27,8 +27,8 @@ TTSI=$(((TTS_PIX_PER_CHAR+1)*TTS_SCALE))
 
 ttsr()
 {
-	TTSY=$TTSYI
-	fb_text2screen -c -B000
+        TTSY=$TTSYI
+        fb_text2screen -c -B000
 }
 
 tts()
@@ -36,8 +36,8 @@ tts()
         fb_text2screen -s $TTS_SCALE -y $TTSY -t "$1"
         echo $1
         let "LINES=1+${#1}/$TTSCM"
-	let "TTSY+=($TTSI*$LINES)"
-	if [ $TTSY -gt $TTSYM ] ; then ttsr ; fi
+        let "TTSY+=($TTSI*$LINES)"
+        if [ $TTSY -gt $TTSYM ] ; then ttsr ; fi
 }
 
 tts_dot_wait(){
@@ -55,12 +55,12 @@ tts_dot_wait(){
 
 shell()
 {
-	echo "Starting shell..."
-	getty 115200 ttyS0 -n -l /bin/sh &
-	while : ; do
-		echo "30" >&3
-		sleep 2
-	done
+        echo "Starting shell..."
+        getty 115200 ttyS0 -n -l /bin/sh &
+        while : ; do
+                echo "30" >&3
+                sleep 2
+        done
 }
 
 reboot_to_harmattan()
@@ -76,62 +76,62 @@ reboot_to_harmattan()
 
 trap_func()
 {
-	tts "Trap!"
+        tts "Trap!"
         reboot_to_harmattan
 }
 
 usb_is_plugged()
 {
-	usb=$(cat /sys/class/power_supply/usb/present)
-	return $usb
+        usb=$(cat /sys/class/power_supply/usb/present)
+        return $usb
 }
 
 show_usb_power_type()
 {
-	pow=$(cat /sys/devices/platform/i2c_omap.1/i2c-1/1-004a/twl5031_bcc/power_supply/usb/type)
-	[ "x$pow" == "xUSB" ] && { tts "Rootfs now exported via USB"; \
-	  return 1 } || return 0
+        pow=$(cat /sys/devices/platform/i2c_omap.1/i2c-1/1-004a/twl5031_bcc/power_supply/usb/type)
+        [ "x$pow" == "xUSB" ] && { tts "Rootfs now exported via USB"; \
+        return 1 } || return 0
 }
 
 export_over_usb()
 {
-	umount /dev/mmcblk0p1
-	MP_ERR=1
-	TRY=0
+        umount /dev/mmcblk0p1
+        MP_ERR=1
+        TRY=0
         while [ "$MP_ERR" -ne "0" -a $TRY -lt 10 ] ; do
-		modprobe g_file_storage file=/dev/mmcblk0p1 stall=0 \
-			removable=1 nofua=1
-		MP_ERR=$?
-		TRY=$(($TRY+1))
+                modprobe g_file_storage file=/dev/mmcblk0p1 stall=0 \
+                removable=1 nofua=1
+                MP_ERR=$?
+                TRY=$(($TRY+1))
                 if [ -z "$ONCE" ]; then
                         tts "Exporting MeeGo rootfs..."
                         ONCE=1
                 else
-			tts "Trying no. $TRY"
-		fi
-	done
-	if [ $TRY == 10 ]; then
+                        tts "Trying no. $TRY"
+                fi
+        done
+        if [ $TRY == 10 ]; then
                 tts "We cannot load the USB modules!"
-		reboot_to_harmattan
+                reboot_to_harmattan
         fi
 
-	show_usb_power_type
-	type=$?
+        show_usb_power_type
+        type=$?
 
-	sleep 1
+        sleep 1
 
-	usb_is_plugged
-	plug=$?
-	while [ $plug == 1 -a $type == 1 ] ; do
-		sleep 1
-		usb_is_plugged
-		plug=$?
-	done
+        usb_is_plugged
+        plug=$?
+        while [ $plug == 1 -a $type == 1 ] ; do
+                sleep 1
+                usb_is_plugged
+                plug=$?
+        done
 }
 
 button_is_pressed()
 {
-	evkey -s /dev/input/event4 | grep -q -w -e 114 -e 115
+        evkey -s /dev/input/event4 | grep -q -w -e 114 -e 115
 }
 
 trap "trap_func" 0 2
@@ -201,7 +201,7 @@ tts "wiki.meego.com/ARM/N9"
 # If the volume key is pressed reboot imedeatly into harmattan
 button_is_pressed
 if [ $? == 0 ] ; then
-	reboot2 s
+        reboot2 s
 fi
 
 # For some reason the partition list doesn't have all partitions
@@ -214,23 +214,23 @@ export_over_usb
 
 mount /dev/mmcblk0p1 /$MOUNT_DIR || (
         tts "Mounting MeeGo failed"
-	tts "We will not be able to"
+        tts "We will not be able to"
         tts "load the kernel."
-	TO_HARMATTAN=1
+        TO_HARMATTAN=1
 )
 
 if [ $TO_HARMATTAN == 1 ] ; then
-	reboot_to_harmattan
+        reboot_to_harmattan
 fi
 
 if [ -e "/$MOUNT_DIR/boot/bzImage" ] ; then
-	tts "Running MeeGo kernel"
-	kexec_load
-	kexec -e
-	tts "kexec failed: $?"
-	tts "Failed to boot /boot/bzImage"
+        tts "Running MeeGo kernel"
+        kexec_load
+        kexec -e
+        tts "kexec failed: $?"
+        tts "Failed to boot /boot/bzImage"
 else
-	tts "No MeeGo kernel image found"
+        tts "No MeeGo kernel image found"
 fi
 
 reboot_to_harmattan
@@ -238,6 +238,6 @@ reboot_to_harmattan
 # exit would trap and start a new shell again, so stay in the loop
 # forever
 while true; do
-	sleep 99999
+        sleep 99999
 done
 
