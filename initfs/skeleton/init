@@ -18,9 +18,12 @@ WD_NAME=twl4030_wdt
 TTSYI=0 # Where to start
 TTSX=0
 TTSY=TTSYI
-TTSYM=830 # Max y lines
-TTSCM=30 # Max char/line
-TTSI=30
+TTS_PIX_PER_CHAR=9
+TTS_SCALE=2
+TTSYM=480 # Max y lines
+TTSXM=830 # Max x lines
+TTSCM=$(($TTSXM/($TTS_PIX_PER_CHAR*$TTS_SCALE))) # Max char/line
+TTSI=$(((TTS_PIX_PER_CHAR+1)*TTS_SCALE))
 
 ttsr()
 {
@@ -30,24 +33,24 @@ ttsr()
 
 tts()
 {
-	fb_text2screen -s 2 -y $TTSY -t "$1"
-	echo $1
+        fb_text2screen -s $TTS_SCALE -y $TTSY -t "$1"
+        echo $1
         let "LINES=1+${#1}/$TTSCM"
 	let "TTSY+=($TTSI*$LINES)"
 	if [ $TTSY -gt $TTSYM ] ; then ttsr ; fi
 }
 
 tts_dot_wait(){
-	TTSX=0
-	for i in 5 4 3 2 1 0; do
-		fb_text2screen -s 2 -y $TTSY -x $TTSX -t "$i "
-		echo -n "$i "
-		let "TTSX+=30"
-		sleep 1
-	done
-	let "LINES=1+6/$TTSCM"
-	let "TTSY+=($TTSI*$LINES)"
-	if [ $TTSY -gt $TTSYM ] ; then ttsr ; fi
+        TTSX=0
+        for i in 5 4 3 2 1 0; do
+                fb_text2screen -s $TTS_SCALE -y $TTSY -x $TTSX -t "$i "
+                echo -n "$i "
+                let "TTSX+=30"
+                sleep 1
+        done
+        let "LINES=1+6/$TTSCM"
+        let "TTSY+=($TTSI*$LINES)"
+        if [ $TTSY -gt $TTSYM ] ; then ttsr ; fi
 }
 
 shell()
