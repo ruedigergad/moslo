@@ -11,6 +11,7 @@
 /usr/lib/hwi/bc/tabby.so
 /usr/bin/fb_text2screen
 usr/bin/kexec_load
+usr/bin/disable_pm
 sbin/reboot2
 sbin/evkey
 etc/moslo-version

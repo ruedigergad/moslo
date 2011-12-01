@@ -204,6 +204,8 @@ if [ $? -eq 0 ]; then
         if [ $? -eq 0 ]; then
                 reboot_to_harmattan 0
         else
+                # Set disable PM features and set cpu clock to resemble POR
+                disable_pm
                 kexec -e
                 tts "kexec failed: $?"
                 tts "Failed to boot /boot/bzImage"
