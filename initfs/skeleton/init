@@ -183,10 +183,29 @@ tts " Welcome to MOSLO v$VERSION"
 tts "    check wiki.merproject.org/wiki/Nemo"
 tts ""
 
-# Export Alternative OS partition via USB
-# HACK: export whole eMMC (for repartitioning, until we 
-#       have that functionality in moslo)
-export_over_usb /dev/mmcblk0
+usb_is_plugged
+if [ $? -eq 1 ]; then
+    if [ ! -b "$ALT_OS_PART" ]; then
+        tts "Repartitioning MMC for AlternateOS."
+        tts "Do not unplug USB or poweroff the device!!!"
+        autopartition.sh create $MMC_DEV > /var/log/repartition.log
+        case $? in
+            0)
+                tts "Re-partitioning successful!"
+                ;;
+            1)
+                tts "ERR: Re-partitioning failed! No partition created."
+                ;;
+            *)
+                tts "FATAL: Re-partitioning failed! You might be in trouble!"
+                tts "You can telnet in the device to try to debug!"
+                ;;
+        esac
+    fi
+
+    # Export AlternateOS partition via USB
+    export_over_usb "$ALT_OS_PART"
+fi
 
 mount $ALT_OS_PART $MOUNT_DIR
 if [ $? -ne 0 ]; then
