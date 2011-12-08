@@ -18,6 +18,3 @@ clean: tools_clean
 	rm -f rootfs.tar
 	rm -Rf rootfs
 
-install:
-	install -d $(DESTDIR)/$(B_NAME)
-
