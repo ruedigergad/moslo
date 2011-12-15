@@ -83,6 +83,13 @@ usb_is_plugged()
 	return $usb
 }
 
+show_usb_power_type()
+{
+	pow=$(cat /sys/devices/platform/i2c_omap.1/i2c-1/1-004a/twl5031_bcc/power_supply/usb/type)
+	[ "x$pow" == "xUSB" ] && { tts "Rootfs now exported via USB"; \
+	  return 1 } || return 0
+}
+
 export_over_usb()
 {
 	umount /dev/mmcblk0p1
@@ -105,13 +112,14 @@ export_over_usb()
 		reboot_to_harmattan
         fi
 
-	tts "Rootfs now exported via USB"
+	show_usb_power_type
+	type=$?
 
 	sleep 1
 
 	usb_is_plugged
 	plug=$?
-	while [ $plug == 1 ] ; do
+	while [ $plug == 1 -a $type == 1 ] ; do
 		sleep 1
 		usb_is_plugged
 		plug=$?
