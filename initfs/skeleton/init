@@ -86,6 +86,19 @@ usb_is_plugged()
         return $usb
 }
 
+wait_mmc()
+{
+        TRY=0
+        tts "Waiting for eMMC device..."
+        while [ ! -e "$MMC_DEV" -a $TRY -lt 10 ] ; do
+            sleep 1
+            TRY=$(($TRY+1))
+        done
+        if [ $TRY == 10 ]; then
+                tts "eMMC device not found!"
+        fi
+}
+
 export_over_usb()
 {
         [ -e "$1" ] && {
@@ -189,6 +202,9 @@ VERSION=$(cat /etc/moslo-version)
 tts " Welcome to MOSLO v$VERSION"
 tts "    check wiki.merproject.org/wiki/Nemo"
 tts ""
+
+# Wait for one second for eMMC to settle
+wait_mmc
 
 usb_is_plugged
 if [ $? -eq 1 ]; then
