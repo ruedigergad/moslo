@@ -17,5 +17,4 @@ usr/bin/disable_pm
 usr/bin/autopartition.sh
 sbin/reboot2
 sbin/evkey
-etc/moslo-version
 

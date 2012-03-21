@@ -185,7 +185,7 @@ SCRIPTS_PATH=$WORK_DIR/initfs/scripts
 TOOLS_PATH=$WORK_DIR/initfs/tools
 PATH=$PATH:$SCRIPTS_PATH:$WORK_DIR/usr/bin:$TOOLS_PATH
 ROOT_DIR=$WORK_DIR/rootfs
-BUILD_VERSION_DIR=$ROOT_DIR/usr/share/moslo
+BUILD_VERSION_DIR=$ROOT_DIR/etc
 
 KERNEL_MODS="g_nokia g_file_storage sep_driver twl4030_keypad g_multi"
 KERNEL_MOD_DEP=$KERNEL_MOD_DIR/modules.dep
@@ -225,7 +225,7 @@ mkdir -p -m755 $(cat $DIR_LIST | sed s!^!$ROOT_DIR!)
 install -m 755 $BUILD_SRC/init $ROOT_DIR/init || exit 1
 
 mkdir -p $BUILD_VERSION_DIR
-echo "Version: $BUILD_VERSION" > $BUILD_VERSION_DIR/build-release
+echo "$BUILD_VERSION" > $BUILD_VERSION_DIR/moslo-version
 
 # Install other files
 install -m644 $BUILD_SRC/fstab $ROOT_DIR/etc/fstab || exit 1
