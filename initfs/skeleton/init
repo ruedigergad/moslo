@@ -7,7 +7,7 @@
 #          Peter Antoniac <peter.antoniac@nokia.com>
 #          Timo Kokkonen <timo.t.kokkonen@nokia.com>
 #          Janne Lääkkö <janne.laakko@nokia.com>
-# 
+#
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
@@ -82,8 +82,13 @@ trap_func()
 
 usb_is_plugged()
 {
-        usb=$(cat /sys/class/power_supply/usb/present)
-        return $usb
+        # type is USB_DCP with wall charger, USB otherwise (including disconnected)
+        if [ "$(cat /sys/class/power_supply/usb/type)" == "USB" ]; then
+            usb=$(cat /sys/class/power_supply/usb/present)
+            return $usb
+        else
+            return 0
+        fi
 }
 
 wait_mmc()
@@ -267,4 +272,3 @@ reboot_to_harmattan 5
 while true; do
         sleep 99999
 done
-
