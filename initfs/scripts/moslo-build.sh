@@ -133,8 +133,12 @@ add_dependencies()
 #
 echo
 echo "Options:"
-while getopts "w:k:m:v:o:t:" opt; do
+while getopts "c:w:k:m:v:o:t:" opt; do
     case $opt in
+        c)
+            CONFIG_DIR=$OPTARG
+            echo "Config dir: $CONFIG_DIR"
+            ;;
         w)
             WORK_DIR=$OPTARG
             echo "Working directory: $WORK_DIR"
@@ -186,8 +190,12 @@ TOOLS_PATH=$WORK_DIR/initfs/tools
 PATH=$PATH:$SCRIPTS_PATH:$WORK_DIR/usr/bin:$TOOLS_PATH
 ROOT_DIR=$WORK_DIR/rootfs
 BUILD_VERSION_DIR=$ROOT_DIR/etc
+KERNEL_MODS=""
 
-KERNEL_MODS="g_nokia g_file_storage sep_driver twl4030_keypad g_multi"
+if [ -f "$CONFIG_DIR/moslo.config" ]; then
+  source $CONFIG_DIR/moslo.config
+fi
+
 KERNEL_MOD_DEP=$KERNEL_MOD_DIR/modules.dep
 
 UTIL_LIST=$BUILD_SRC/util-list
@@ -241,6 +249,11 @@ ln -s /init $ROOT_DIR/sbin/preinit
 rm -f /tmp/build-tmp-*
 TMPFILE=$(mktemp /tmp/build-tmp-XXXXXX) || exit 1
 add_dependencies $UTIL_LIST $TMPFILE
+
+if [ -z "$CONFIG_DIR/file-list" ]; then
+  add_dependencies $CONFIG_DIR/file-list $TMPFILE
+fi
+
 LIBS=$(cat $TMPFILE)
 
 #
@@ -344,6 +357,7 @@ mkdir -p $TARGET_KERNEL_MOD_DIR
 # create tar of rootfs
 #
 if [ -n $TAR_FILE ]; then
+        echo "Packing $ROOT_DIR to $WORK_DIR/$TAR_FILE"
         tar -cf $WORK_DIR/$TAR_FILE $ROOT_DIR
         debug "$(tar -tf $WORK_DIR/$TAR_FILE)"
 fi
@@ -354,13 +368,13 @@ fi
 if [ -z $NO_BUILD_FILE_REQ ]; then
     gen_initramfs_list.sh -o $WORK_DIR/rootfs.cpio \
         -u squash -g squash $ROOT_DIR
-    gzip  $WORK_DIR/rootfs.cpio
+    gzip -f $WORK_DIR/rootfs.cpio
     cat $KERNEL_ZIMAGE > zImage
     cat $WORK_DIR/rootfs.cpio.gz > initrd.img
-        cat $KERNEL_ZIMAGE > $BUILD_FILE
-        cat $WORK_DIR/rootfs.cpio.gz >> $BUILD_FILE
-        echo Build is ready at $BUILD_FILE
+    cat $KERNEL_ZIMAGE > $BUILD_FILE
+    cat $WORK_DIR/rootfs.cpio.gz >> $BUILD_FILE
+    echo Build is ready at $BUILD_FILE
 else
-        echo Build is ready
+    echo Build is ready
 fi
 

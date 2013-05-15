@@ -16,7 +16,6 @@ INIT_OPTS=
 MMC_DEV="/dev/mmcblk0"
 ALT_OS_PART="$MMC_DEV"p4
 IP_ARRD="192.168.2.15"
-WD_NAME=twl4030_wdt
 # Text2screen wrapper for next lines
 TTSYI=0 # Where to start
 TTSX=0
@@ -61,8 +60,10 @@ shell()
         echo "Starting shell..."
         getty 115200 ttyS0 -n -l /bin/sh &
         while : ; do
-                echo "30" >&3
-                sleep 2
+          if [ -n "$WD_DEVICE" ]; then
+            echo "30" >&3
+          fi
+          sleep 2
         done
 }
 
@@ -157,9 +158,17 @@ mkdir /dev/pts
 mount -a
 cat /proc/mounts > /etc/mtab
 
-# Kick the watch dog
-exec 3>/dev/$WD_NAME
-echo "30" >&3
+# Get the device specific configs
+if [ -f /moslo.config ]; then
+  source /moslo.config
+fi
+
+# If there is Watch dog device set then kick it
+if [ -n "$WD_DEVICE" ]; then
+  # Kick the watch dog
+  exec 3>$WD_DEVICE
+  echo "30" >&3
+fi
 
 # adjust kernel to minimize memory consumption,
 # flushing of memory card buffers
@@ -189,13 +198,11 @@ mdev -s
 #Set mdev as hotplug manager
 echo /bin/mdev > /proc/sys/kernel/hotplug
 
-# Load modules
-modprobe twl4030_keypad
-modprobe g_nokia  # load g_nokia to make bme function properly
-
-#Start services
 syslogd &
-bme_RX-71 -n -c usr/lib/hwi/hw/rx71.so -d
+
+/sbin/init_preps.sh
+
+# Start telnetd service
 telnetd -l/bin/sh
 
 # Start shell for console use

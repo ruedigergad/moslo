@@ -1,0 +1,9 @@
+/usr/sbin/bme_RX-71
+/usr/lib/hwi/hw/rx71.so
+/usr/lib/hwi/ic/bq24153.so
+/usr/lib/hwi/ic/bq24156.so
+/usr/lib/hwi/ic/bq27521.so
+/usr/lib/hwi/ic/twl5030.so
+/usr/lib/hwi/ic/twl5031.so
+/usr/lib/hwi/bc/tabby.so
+

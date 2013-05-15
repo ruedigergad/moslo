@@ -4,9 +4,10 @@ include initfs/tools/Makefile
 
 rootfs.tar: tools
 	./initfs/scripts/moslo-build.sh \
+		-c $(CONFIG_DIR) \
 		-w  . \
-		-k /boot/vmlinuz-$(KERNEL_VERSION) \
-		-m /lib/modules/$(KERNEL_VERSION) \
+		-k $(SOURCE_DIR)/boot/vmlinuz-$(KERNEL_VERSION) \
+		-m $(SOURCE_DIR)/lib/modules/$(KERNEL_VERSION) \
 		-v $(VERSION) \
 		-o moslo.img \
 		-t rootfs.tar 

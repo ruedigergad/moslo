@@ -1,6 +1,11 @@
 TOOLS_PATH=./initfs/tools
 
-tools: gen_init_cpio reboot2 evkey install_util
+tools: gen_init_cpio reboot2 evkey install_util install_configs
+
+install_configs:
+	install -d ./sbin
+	install -m 755 $(CONFIG_DIR)/init_preps.sh ./sbin
+	install -m 755 $(CONFIG_DIR)/moslo.config ./moslo.config
 
 install_util:
 	install -d ./sbin
