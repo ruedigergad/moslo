@@ -26,6 +26,7 @@ TTSYM=480 # Max y lines
 TTSXM=830 # Max x lines
 TTSCM=$(($TTSXM/($TTS_PIX_PER_CHAR*$TTS_SCALE))) # Max char/line
 TTSI=$(((TTS_PIX_PER_CHAR+1)*TTS_SCALE))
+PRINT="tts"
 
 ttsr()
 {
