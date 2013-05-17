@@ -70,14 +70,14 @@ shell()
 reboot_to_harmattan()
 {
         [ $# -ge 1 ] && TIMEOUT=$1 || TIMEOUT=0;
-        tts "Booting to Harmattan in $TIMEOUT seconds"
+        $PRINT "Booting to Harmattan in $TIMEOUT seconds"
         sleep $TIMEOUT
         reboot2 s
 }
 
 trap_func()
 {
-        tts "Trap!"
+        $PRINT "Trap!"
         reboot_to_harmattan
 }
 
@@ -95,13 +95,13 @@ usb_is_plugged()
 wait_mmc()
 {
         TRY=0
-        tts "Waiting for eMMC device..."
+        $PRINT "Waiting for eMMC device..."
         while [ ! -e "$MMC_DEV" -a $TRY -lt 10 ] ; do
             sleep 1
             TRY=$(($TRY+1))
         done
         if [ $TRY == 10 ]; then
-                tts "eMMC device not found!"
+                $PRINT "eMMC device not found!"
         fi
 }
 
@@ -121,17 +121,17 @@ export_over_usb()
                 lsmod |grep -q g_multi
                 MP_ERR=$?
                 TRY=$(($TRY+1))
-                #tts "Try $TRY ($MP_ERR)"
+                #$PRINT "Try $TRY ($MP_ERR)"
         done
         if [ $TRY == 10 ]; then
-                tts "Unable to load the USB modules!"
+                $PRINT "Unable to load the USB modules!"
         else
                 [ -n "$EXPORT_FILE" ] && \
-                    tts "Rootfs of AlternateOS now exported via USB"
+                    $PRINT "Rootfs of AlternateOS now exported via USB"
                 ifconfig usb0 $IP_ARRD up
                 [ $? -eq 0 ] && \
-                    tts "You can telnet into $IP_ARRD" || \
-                    tts "Setting IP address failed!"
+                    $PRINT "You can telnet into $IP_ARRD" || \
+                    $PRINT "Setting IP address failed!"
         fi
 
         sleep 1
@@ -176,21 +176,21 @@ fi
 
 #TODO fix pty/max and dirty ratio in kernel configuration
 echo 256 > /proc/sys/kernel/threads-max || \
-  tts "Set fail for kernel thread-max"
+  $PRINT "Set fail for kernel thread-max"
 echo 8192 > /proc/sys/fs/file-max || \
-  tts "Set fail for kernel file-max"
+  $PRINT "Set fail for kernel file-max"
 echo 1 > /proc/sys/vm/swappiness || \
-  tts "Set fail for swappiness"
+  $PRINT "Set fail for swappiness"
 echo 5 > /proc/sys/vm/page-cluster || \
-  tts "Set fail for page-cluster"
+  $PRINT "Set fail for page-cluster"
 echo 500 > /proc/sys/vm/dirty_expire_centisecs || \
-  tts "Set fail for expire_centisecs"
+  $PRINT "Set fail for expire_centisecs"
 echo 60 > /proc/sys/vm/dirty_background_ratio || \
-  tts "Set fail for dirty_background_ratio"
+  $PRINT "Set fail for dirty_background_ratio"
 echo 65536 > /proc/sys/net/core/rmem_default || \
-  tts "Set fail for rmem_default"
+  $PRINT "Set fail for rmem_default"
 echo 16384 > /proc/sys/net/core/wmem_default || \
-  tts "Set fail for wmem_default"
+  $PRINT "Set fail for wmem_default"
 
 #Run mdev
 mdev -s
@@ -211,9 +211,9 @@ shell &
 # Clear screen and display welcome message
 ttsr
 VERSION=$(cat /etc/moslo-version)
-tts " Welcome to MOSLO v$VERSION"
-tts "    check wiki.merproject.org/wiki/Nemo"
-tts ""
+$PRINT " Welcome to MOSLO v$VERSION"
+$PRINT "    check wiki.merproject.org/wiki/Nemo"
+$PRINT ""
 
 # Wait for one second for eMMC to settle
 wait_mmc
@@ -221,19 +221,19 @@ wait_mmc
 usb_is_plugged
 if [ $? -eq 1 ]; then
     if [ ! -b "$ALT_OS_PART" ]; then
-        tts "Repartitioning MMC for AlternateOS."
-        tts "Do not unplug USB or poweroff the device!!!"
+        $PRINT "Repartitioning MMC for AlternateOS."
+        $PRINT "Do not unplug USB or poweroff the device!!!"
         autopartition.sh create $MMC_DEV > /var/log/repartition.log
         case $? in
             0)
-                tts "Re-partitioning successful!"
+                $PRINT "Re-partitioning successful!"
                 ;;
             1)
-                tts "ERR: Re-partitioning failed! No partition created."
+                $PRINT "ERR: Re-partitioning failed! No partition created."
                 ;;
             *)
-                tts "FATAL: Re-partitioning failed! You might be in trouble!"
-                tts "You can telnet in the device to try to debug!"
+                $PRINT "FATAL: Re-partitioning failed! You might be in trouble!"
+                $PRINT "You can telnet in the device to try to debug!"
                 ;;
         esac
     fi
@@ -244,7 +244,7 @@ fi
 
 mount $ALT_OS_PART $MOUNT_DIR
 if [ $? -ne 0 ]; then
-        tts "Mounting AlternateOS failed. Not able to boot that."
+        $PRINT "Mounting AlternateOS failed. Not able to boot that."
         reboot_to_harmattan 5
 fi
 
@@ -252,11 +252,11 @@ fi
 kexec_load $MOUNT_DIR
 
 if [ $? -eq 0 ]; then
-        tts "Found AlternateOS kernel."
-        tts "Autoboot to AlternateOS in 15 seconds"
-        tts ""
-        tts "Press: VolumeUp button to boot to Harmattan"
-        tts "       VolumeDown button to boot to AlternateOS."
+        $PRINT "Found AlternateOS kernel."
+        $PRINT "Autoboot to AlternateOS in 15 seconds"
+        $PRINT ""
+        $PRINT "Press: VolumeUp button to boot to Harmattan"
+        $PRINT "       VolumeDown button to boot to AlternateOS."
         # Check if keycode 115 is emitted
         evkey -u -t 15000 /dev/input/event4 | grep -q -w 115
         if [ $? -eq 0 ]; then
@@ -265,11 +265,11 @@ if [ $? -eq 0 ]; then
                 # Set disable PM features and set cpu clock to resemble POR
                 disable_pm
                 kexec -e
-                tts "kexec failed: $?"
-                tts "Failed to boot /boot/bzImage"
+                $PRINT "kexec failed: $?"
+                $PRINT "Failed to boot /boot/bzImage"
         fi
 else
-        tts "Unable to load AlternateOS kernel."
+        $PRINT "Unable to load AlternateOS kernel."
 fi
 
 reboot_to_harmattan 5
